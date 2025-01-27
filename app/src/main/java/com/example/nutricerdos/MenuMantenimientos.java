@@ -11,6 +11,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.nutricerdos.matenimientos.AlimentosMant;
+import com.example.nutricerdos.matenimientos.ArticulosImagenes;
 import com.example.nutricerdos.matenimientos.LotesMant;
 
 public class MenuMantenimientos extends AppCompatActivity {
@@ -34,6 +35,11 @@ public class MenuMantenimientos extends AppCompatActivity {
 
     public void GoToAliMant(View view){
         Intent intent = new Intent(this, AlimentosMant.class);
+        startActivity(intent);
+    }
+
+    public void GoToImagenes(View view){
+        Intent intent = new Intent(this, ArticulosImagenes.class);
         startActivity(intent);
     }
 }

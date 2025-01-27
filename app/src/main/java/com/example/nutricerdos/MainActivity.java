@@ -53,37 +53,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onIngresar(View view){
-//        EditText userfield = findViewById(R.id.username);
-//        EditText passfield = findViewById(R.id.password);
-//
-//        String username = userfield.getText().toString();
-//        String password = passfield.getText().toString();
-//
-//        Conex<Usuario> conn = new Conex<Usuario>(GlobalData.path + "/usuario/login", Usuario.class);
-//
-//        conn.login(username, password, new Callback<Usuario>() {
-//            @Override
-//            public void onSuccess(Usuario result) {
-//                if(result == null){
-//                    runOnUiThread(() -> {
-//                        Toast.makeText(MainActivity.this, "USUARIO O CONTRASEÑA INCORRECTOS", Toast.LENGTH_SHORT).show();
-//                    });
-//                }
-//
-//                GlobalData.usuario = result;
-//                if(GlobalData.usuario == null) return;
-//                goToMenu();
-//            }
-//
-//            @Override
-//            public void onError(Exception e) {
-//                runOnUiThread(() -> {
-//                    Toast.makeText(MainActivity.this, "USUARIO O CONTRASEÑA INCORRECTOS", Toast.LENGTH_SHORT).show();
-//                });
-//                Log.e("ERROR LOGIN", e.getMessage());
-//            }
-//        });
-        goToMenu();
+        EditText userfield = findViewById(R.id.username);
+        EditText passfield = findViewById(R.id.password);
+
+        String username = userfield.getText().toString();
+        String password = passfield.getText().toString();
+
+        Conex<Usuario> conn = new Conex<Usuario>(GlobalData.path + "/usuario/login", Usuario.class);
+
+        conn.login(username, password, new Callback<Usuario>() {
+            @Override
+            public void onSuccess(Usuario result) {
+                if(result == null){
+                    runOnUiThread(() -> {
+                        Toast.makeText(MainActivity.this, "USUARIO O CONTRASEÑA INCORRECTOS", Toast.LENGTH_SHORT).show();
+                    });
+                }
+
+                GlobalData.usuario = result;
+                if(GlobalData.usuario == null) return;
+                goToMenu();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                runOnUiThread(() -> {
+                    Toast.makeText(MainActivity.this, "USUARIO O CONTRASEÑA INCORRECTOS", Toast.LENGTH_SHORT).show();
+                });
+                Log.e("ERROR LOGIN", e.getMessage());
+            }
+        });
+//        goToMenu();
     }
 
     private void goToMenu(){

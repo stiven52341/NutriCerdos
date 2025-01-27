@@ -47,6 +47,8 @@ public class ConsultaGeneral extends AppCompatActivity {
         proAliPre = findViewById(R.id.proAliPre);
         aliCaro = findViewById(R.id.aliCaro);
         aliBara = findViewById(R.id.aliBara);
+
+        onInit();
     }
 
     private void onInit(){
@@ -100,14 +102,8 @@ public class ConsultaGeneral extends AppCompatActivity {
 
                         context.proAliPre.setText(String.format("PROMEDIO ALIMENTO-PRECIO: %.2d", totalPrecios / alimentos.size()));
 
-                        Alimento masCaro = alimentos.get(0);
-                        for(Alimento a: alimentos){
-                            for(AlimentoUnidad au: aus){
-                                if(au.getId_alimento() != a.getId()) continue;
-
-                                if(au.getPrecio() > )
-                            }
-                        }
+                        context.aliCaro.setText("ALIMENTO MÁS BARATO: " + getAlimentoMasCaro(alimentos, aus).getNombre());
+                        context.aliBara.setText("ALIMENTO MÁS BARATO: " + getAlimentoMasBarato(alimentos, aus));
                     }
 
                     @Override
@@ -122,5 +118,38 @@ public class ConsultaGeneral extends AppCompatActivity {
 
             }
         });
+    }
+
+    private Alimento getAlimentoMasCaro(List<Alimento> alimentos, List<AlimentoUnidad> unidades){
+        Alimento masCaro = alimentos.get(0);
+
+        for(Alimento a: alimentos){
+            if(getUnidadFromAlimento(a, unidades).getPrecio() > getUnidadFromAlimento(masCaro,unidades).getPrecio()){
+                masCaro = a;
+            }
+        }
+
+        return masCaro;
+    }
+    private AlimentoUnidad getUnidadFromAlimento(Alimento a, List<AlimentoUnidad> unidades){
+        for(AlimentoUnidad unidad: unidades){
+            if(a.getId() == unidad.getId_alimento()){
+                return unidad;
+            }
+        }
+
+        return null;
+    }
+
+    private Alimento getAlimentoMasBarato(List<Alimento> alimentos, List<AlimentoUnidad> unidades){
+        Alimento menosCaro = alimentos.get(0);
+
+        for(Alimento a: alimentos){
+            if(getUnidadFromAlimento(a, unidades).getPrecio() < getUnidadFromAlimento(menosCaro,unidades).getPrecio()){
+                menosCaro = a;
+            }
+        }
+
+        return menosCaro;
     }
 }
