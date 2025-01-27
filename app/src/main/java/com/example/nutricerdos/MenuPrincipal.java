@@ -10,6 +10,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.nutricerdos.consultas.ConsultaGeneral;
+
 public class MenuPrincipal extends AppCompatActivity {
 
     @Override
@@ -26,6 +28,11 @@ public class MenuPrincipal extends AppCompatActivity {
 
     public void onMantenimientos(View view){
         Intent intent = new Intent(this, MenuMantenimientos.class);
+        startActivity(intent); // Inicia la nueva actividad
+    }
+
+    public void onConsultas(View view){
+        Intent intent = new Intent(this, ConsultaGeneral.class);
         startActivity(intent); // Inicia la nueva actividad
     }
 }
