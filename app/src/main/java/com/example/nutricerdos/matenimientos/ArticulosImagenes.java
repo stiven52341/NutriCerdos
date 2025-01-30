@@ -41,9 +41,11 @@ import models.Callback;
 import models.GlobalData;
 import models.Imagen;
 import models.InsertResponse;
+import models.ResponseEntity;
 
 public class ArticulosImagenes extends AppCompatActivity {
     private List<Alimento> alimentos;
+    private List<Imagen> imagenes;
 
     private Imagen imagen;
 
@@ -70,12 +72,15 @@ public class ArticulosImagenes extends AppCompatActivity {
     }
 
     private void onInit(ArticulosImagenes context){
+        runOnUiThread(() -> {
+            Toast.makeText(context, "Cargando imagenes", Toast.LENGTH_LONG).show();
+        });
         getAlimentos(context);
 
         this.alimentosSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                setImage(context);
+                setImage();
             }
 
             @Override
@@ -85,34 +90,28 @@ public class ArticulosImagenes extends AppCompatActivity {
         });
     }
 
-    private void setImage(ArticulosImagenes context){
+    private void setImage(){
         String option = ((Spinner)findViewById(R.id.alimento)).getSelectedItem().toString();
-        if(option == null) return;
+        if(imagenes == null || imagenes.isEmpty()) return;
 
         int idAlimento = Integer.parseInt(option.split(". ")[0]);
 
-        Conex<Imagen> con = new Conex<>(GlobalData.path + "/imagen", Imagen.class);
-        con.getAll(new Callback<List<Imagen>>() {
-            @Override
-            public void onSuccess(List<Imagen> result) {
-                for(Imagen imagen: result){
-                    if(imagen.getId_alimento() == idAlimento){
-                        context.imagen = imagen;
-                    }
-                }
+        ImageView view = findViewById(R.id.img);
+        for(Imagen imagen: this.imagenes){
+            if(idAlimento == imagen.getId_alimento()){
+                Bitmap bitmap = this.convertBase64ToBitmap(imagen.getImagen());
 
-                Bitmap bitmap = convertBase64ToBitmap(context.imagen.getImagen());
 
-                runOnUiThread(() -> {
-                    context.image.setImageBitmap(bitmap);
+                runOnUiThread(()-> {
+                    view.setImageBitmap(bitmap);
+                    view.setVisibility(VISIBLE);
                 });
+
+                return;
             }
 
-            @Override
-            public void onError(Exception e) {
-
-            }
-        });
+        }
+        view.setVisibility(View.INVISIBLE);
     }
 
     private void getAlimentos(ArticulosImagenes context){
@@ -138,12 +137,38 @@ public class ArticulosImagenes extends AppCompatActivity {
 
                 runOnUiThread(() -> {
                     context.alimentosSpinner.setAdapter(adapter);
+
+                    runOnUiThread(() -> {
+                        Toast.makeText(context, "Alimentos cargados", Toast.LENGTH_LONG).show();
+                    });
+                });
+
+                Conex<Imagen> con2 = new Conex<>(GlobalData.path + "/imagen", Imagen.class);
+                con2.getAll(new Callback<List<Imagen>>() {
+                    @Override
+                    public void onSuccess(List<Imagen> result) {
+                        context.imagenes = result;
+                        context.setImage();
+
+                        runOnUiThread(() -> {
+                            Toast.makeText(context, "Imagenes cargadas", Toast.LENGTH_SHORT).show();
+                        });
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(context, "Error al cargar imagenes", Toast.LENGTH_SHORT).show();
+                        });
+                    }
                 });
             }
 
             @Override
             public void onError(Exception e) {
-
+                runOnUiThread(() -> {
+                    Toast.makeText(context, "Error al cargar alimentos", Toast.LENGTH_SHORT).show();
+                });
             }
         });
     }
@@ -207,28 +232,68 @@ public class ArticulosImagenes extends AppCompatActivity {
         int idAlimento = Integer.parseInt(((Spinner)findViewById(R.id.alimento)).getSelectedItem().toString().split(". ")[0]);
         this.imagen.setId_alimento(idAlimento);
 
-        Conex<Imagen> con = new Conex<>(GlobalData.path + "/imagen", Imagen.class);
-        con.insert(this.imagen, new Callback<InsertResponse>() {
-            @Override
-            public void onSuccess(InsertResponse result) {
-                runOnUiThread(() -> {
-                    Toast.makeText(view.getContext(), "IMAGEN GUARDADA", Toast.LENGTH_LONG).show();
-                });
-            }
+        if(!this.isAlimentoImage(idAlimento)){
+            Conex<Imagen> con = new Conex<>(GlobalData.path + "/imagen", Imagen.class);
+            con.insert(this.imagen, new Callback<InsertResponse>() {
+                @Override
+                public void onSuccess(InsertResponse result) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(view.getContext(), "IMAGEN GUARDADA", Toast.LENGTH_LONG).show();
+                    });
+                }
 
-            @Override
-            public void onError(Exception e) {
-                runOnUiThread(() -> {
-                    Toast.makeText(view.getContext(), "ERROR", Toast.LENGTH_LONG).show();
-                });
-                Log.e("IMAGEN ERROR", e.getMessage());
-            }
-        });
+                @Override
+                public void onError(Exception e) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(view.getContext(), "ERROR", Toast.LENGTH_LONG).show();
+                    });
+                    Log.e("IMAGEN ERROR", e.getMessage());
+                }
+            });
+        }else{
+            Conex<Imagen> con = new Conex<>(GlobalData.path + "/imagen/update",Imagen.class);
+            con.update(this.imagen, new Callback<ResponseEntity<Boolean>>() {
+                @Override
+                public void onSuccess(ResponseEntity<Boolean> result) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(view.getContext(), "Imagen actualizada", Toast.LENGTH_SHORT).show();
+                    });
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(view.getContext(), "Error al actualizar", Toast.LENGTH_SHORT).show();
+                    });
+                    Log.e("IMAGEN ERROR", e.getMessage());
+                }
+            });
+        }
     }
 
     private Bitmap convertBase64ToBitmap(String base64){
-        byte[] decodedBytes = Base64.decode(base64, Base64.DEFAULT);
-        // Convertir los bytes a un Bitmap
-        return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+        try{
+//            base64 = "data:image/jpeg;base64," + base64;
+            byte[] decodedBytes = Base64.decode(base64, Base64.DEFAULT);
+            // Convertir los bytes a un Bitmap
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inSampleSize = 2;
+
+            return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length,options);
+        }catch(Exception e){
+            runOnUiThread(() -> {
+                Toast.makeText(this, "Error al convertir", Toast.LENGTH_SHORT).show();
+            });
+        }
+        return null;
+    }
+
+    private boolean isAlimentoImage(int idAlimento){
+        for(Imagen imagen: this.imagenes){
+            if(idAlimento == imagen.getId_alimento()){
+                return true;
+            }
+        }
+        return false;
     }
 }

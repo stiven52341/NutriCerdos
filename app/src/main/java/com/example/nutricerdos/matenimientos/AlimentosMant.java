@@ -81,12 +81,13 @@ public class AlimentosMant extends AppCompatActivity {
 
                 AlimentoUnidad au_ = null;
                 for(AlimentoUnidad au: alimento_unidades){
-                    if(au.getId_alimento() == al.getId() && au.getId_unidad() == getIdUnidad()){
+                    assert al != null;
+                    if(au.getId_alimento() == al.getId()){
                         au_ = au;
                         break;
                     }
                 }
-                if(al == null || au_ == null){
+                if(al == null){
                     return;
                 }
                 setForm(al,au_);
